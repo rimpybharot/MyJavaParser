@@ -17,10 +17,6 @@
 			<artifactId>plantuml</artifactId>
 			<version>6703</version>
 		</dependency>
-		<dependency>
-			<groupId>com.github.javaparser</groupId>
-			<artifactId>javaparser</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>

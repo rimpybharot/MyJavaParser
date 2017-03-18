@@ -72,7 +72,7 @@ public class VariableParser {
 			String name = variableDefinition.get(2).toString();
 			String type = variableDefinition.get(1).toString();
 			String modifier = variableDefinition.get(0).toString();
-			finalVariable = modifier+type+":"+name;
+			finalVariable = modifier +" " + type + " : " + name;
 			return finalVariable;
 		}
 		else{

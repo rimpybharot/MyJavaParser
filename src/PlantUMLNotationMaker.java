@@ -1,14 +1,15 @@
 import java.io.File;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.github.javaparser.ParseException;
 
 public class PlantUMLNotationMaker {
 
-	private String interfaces;
+	private List<String> interfaces;
 	private String classes;
-	private String interfaceImplentations;
+	private List<String> interfaceImplentations;
 	private String extendsImplementation;
 
 	private String umlTextNotation;
@@ -16,26 +17,30 @@ public class PlantUMLNotationMaker {
 
 	public PlantUMLNotationMaker(List<File> javafiles) throws ParseException{
 
-
+		interfaces = new ArrayList<String>();
+		interfaceImplentations = new ArrayList<String>();
+	
+		
 
 		for (File file : javafiles){
 
 			ClassesDeclarationChecker cdc = new ClassesDeclarationChecker();
 			cdc.classOrInterfaceFinder(file);
 			System.out.println("Parsed");
-			if(cdc.getClasses()!=null){
-				this.interfaces += cdc.getClasses();
-				this.interfaces+="\n";
-			}
-			if(cdc.getInterfaces()!=null){
-				this.interfaces += cdc.getInterfaces();
-				this.interfaces+="\n";
-			}
-//			if(cdc.getImplements()!=null){
-//				for(String implementation : cdc.getImplements()){
-//					this.interfaceImplentations += implementation;
-//				}
+//			if(cdc.getClasses()!=null){
+//				this.classes = cdc.getClasses();
 //			}
+			if(cdc.getInterfaces()!=null){
+				interfaces.addAll(cdc.getInterfaces());
+			}
+			
+			interfaceImplentations.addAll(cdc.getImplementations());
+			
+//			if(cdc.getImplementations()!=null){
+//				for(String implementation : cdc.getImplementations()){
+//					interfaceImplentations.adimplementation;
+//				}
+////			}
 //			if(cdc.getExtends()!=null){
 //				for(String extension : cdc.getExtends()){
 //					this.extendsImplementation += extension;
@@ -50,8 +55,17 @@ public class PlantUMLNotationMaker {
 		String plantUmlSource = new String();
 
 		plantUmlSource += "@startuml\nskinparam classAttributeIconSize 0\n";
-		plantUmlSource += interfaces;
-		plantUmlSource += this.interfaceImplentations;
+		for(String interfaceName : interfaces ){
+			plantUmlSource += interfaceName;
+			
+		}
+		
+		for(String interfaceName : interfaceImplentations ){
+			plantUmlSource += interfaceName;
+			
+		}
+//		plantUmlSource += interfaces;
+//		plantUmlSource += this.interfaceImplentations;
 
 		//		plantUmlSource += classesOrInterfaces;
 

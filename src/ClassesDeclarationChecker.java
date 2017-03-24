@@ -2,6 +2,7 @@
 import java.io.File;
 
 import java.io.IOException;
+import java.lang.instrument.ClassDefinition;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -17,26 +18,24 @@ public class ClassesDeclarationChecker {
 
 	private List<String> interfaces;
 	private List<String> classes;
-	private String className;
-	private String interfaceName;
-	private String implementsClass;
-	private String extendsClass;
 	private List<String> implemntations;
 	private List<String> extensions;
-	
+	private List<String> variables;
+
 	public ClassesDeclarationChecker() {
 		// TODO Auto-generated constructor stub
 		this.interfaces = new ArrayList<String>();
 		this.classes = new ArrayList<String>();
 		this.implemntations = new ArrayList<String>();
 		this.extensions = new ArrayList<String>();
+		this.variables = new ArrayList<String>();
 	}
 
-	
-	public void classOrInterfaceFinder(File file) throws ParseException {
-		
+
+	public void classOrInterfaceFinder(File file) throws ParseException, IOException {
+
 		System.out.println("Reading file " + file.getName());
-		
+
 		try {
 			new VoidVisitorAdapter<Object>() {
 
@@ -44,6 +43,8 @@ public class ClassesDeclarationChecker {
 				@Override
 				public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 					super.visit(n, arg);
+
+
 					if(n.isInterface()){
 						System.out.println("getting interface " + n.getNameAsString());
 						setInterfaces(n);
@@ -62,15 +63,13 @@ public class ClassesDeclarationChecker {
 		}
 	}
 
+
 	public void setExtends(ClassOrInterfaceDeclaration n) {
 		// TODO Auto-generated method stub
 		//		extendsClass = n.getExtendedTypes();
 		for(ClassOrInterfaceType citype : n.getExtendedTypes()){
-//			System.out.println(citype.getNameAsString());
-//			this.extensions.add(citype.getNameAsString());
-
 			if(citype != null){
-				this.extensions.add("\n"+n.getNameAsString() + " *- " + citype.getNameAsString());
+				this.extensions.add("\n"+citype.getNameAsString() + " <|-- " + n.getNameAsString());
 			}
 		}
 
@@ -78,30 +77,48 @@ public class ClassesDeclarationChecker {
 
 	public void setImplements(ClassOrInterfaceDeclaration n) {
 		// TODO Auto-generated method stub
-//		System.out.println("this is for getting the interfaces");
 		for(ClassOrInterfaceType citype : n.getImplementedTypes()){
-			
-//			System.out.println(citype.getNameAsString());
-//			this.implemntations.add(citype.getNameAsString());
-			
 			if(citype != null){
-//				System.out.println(citype.getNameAsString());
-				this.implemntations.add("\n"+ citype.getNameAsString()+ " <|-- " + n.getNameAsString());
-
+				this.implemntations.add("\n"+ citype.getNameAsString()+ " <|.. " + n.getNameAsString());
 			}
 		}
 	}
 
 	public void setInterfaces(ClassOrInterfaceDeclaration n) {
 		// TODO Auto-generated method stub
-//		this.interfaceName = "interface " + n.getNameAsString();
 		this.interfaces.add("\ninterface " + n.getNameAsString());
 	}
 
-	public void setClasses(ClassOrInterfaceDeclaration n) {
-		// TODO Auto-generated method stub
-//			this.className = "class  " + n.getNameAsString();
-		this.classes.add(n.getNameAsString());
+	//	public void setClasses(ClassOrInterfaceDeclaration n) {
+	//		// TODO Auto-generated method stub
+	//		this.classes.add("\n class " + n.getNameAsString());
+	//	}
+
+	public void setClasses(ClassOrInterfaceDeclaration n){
+		String classDeclaration = "\nclass " + n.getNameAsString() + "{\n";
+
+		VariableParser vp = new VariableParser();
+		vp.listVariables(n);
+
+		MethodDeclarationChecker md = new MethodDeclarationChecker();
+		md.setMethodsDetails(n);
+//		md.getMethodNames();
+//		md.getParameters();
+		
+		
+
+		for(String variable : vp.getVariables()){
+			classDeclaration += variable + "\n";
+		}
+
+		for(String method : md.getMethodNames()){
+			classDeclaration += method + "\n";
+		}
+		classDeclaration += "}";
+
+		this.classes.add(classDeclaration);
+
+
 	}
 
 	public List<String> getExtensions() {
@@ -121,9 +138,8 @@ public class ClassesDeclarationChecker {
 		return this.interfaces;
 	}
 
-	public String getClasses() {
+	public List<String> getClasses() {
 		// TODO Auto-generated method stub
-//		System.out.println(this.className);
-		return this.className;
+		return this.classes;
 	}
 }

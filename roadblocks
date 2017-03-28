@@ -4,3 +4,6 @@ issues faced till day:
 3. plantuml maven
 4. get objects
 5. how to retrieve signatures?
+6. Create uses relationship: find if a class is dependent on the object of some oter class by the virtue of being parameter to one of ots functions
+7. getters and setters
+multilplicity

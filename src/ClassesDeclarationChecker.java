@@ -20,7 +20,8 @@ public class ClassesDeclarationChecker {
 	private List<String> classes;
 	private List<String> implemntations;
 	private List<String> extensions;
-	private List<String> variables;
+	private List<String> uses;
+	private List<String> classNames;
 
 	public ClassesDeclarationChecker() {
 		// TODO Auto-generated constructor stub
@@ -28,14 +29,15 @@ public class ClassesDeclarationChecker {
 		this.classes = new ArrayList<String>();
 		this.implemntations = new ArrayList<String>();
 		this.extensions = new ArrayList<String>();
-		this.variables = new ArrayList<String>();
+		this.uses = new ArrayList<String>();
+		this.classNames = new ArrayList<String>();
+
 	}
 
 
 	public void classOrInterfaceFinder(File file) throws ParseException, IOException {
 
 		System.out.println("Reading file " + file.getName());
-
 		try {
 			new VoidVisitorAdapter<Object>() {
 
@@ -43,24 +45,31 @@ public class ClassesDeclarationChecker {
 				@Override
 				public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 					super.visit(n, arg);
-
-
+					setClassNames(n);
 					if(n.isInterface()){
 						System.out.println("getting interface " + n.getNameAsString());
 						setInterfaces(n);
+						setCommonMethods(n);
 					}
 					else{
 						System.out.println("getting classes and implementions and extensions for " + n.getNameAsString());
 						setImplements(n);
-						setClasses(n);
 						setExtends(n);
+//						setUses(n);
 					}
+					setClasses(n);
 				}
 			}.visit(JavaParser.parse(file), null);
 		} catch (IOException e) {
 			new RuntimeException(e);
 
 		}
+	}
+
+
+	protected void setCommonMethods(ClassOrInterfaceDeclaration n) {
+		// TODO Auto-generated method stub
+		
 	}
 
 
@@ -76,7 +85,6 @@ public class ClassesDeclarationChecker {
 	}
 
 	public void setImplements(ClassOrInterfaceDeclaration n) {
-		// TODO Auto-generated method stub
 		for(ClassOrInterfaceType citype : n.getImplementedTypes()){
 			if(citype != null){
 				this.implemntations.add("\n"+ citype.getNameAsString()+ " <|.. " + n.getNameAsString());
@@ -85,27 +93,38 @@ public class ClassesDeclarationChecker {
 	}
 
 	public void setInterfaces(ClassOrInterfaceDeclaration n) {
-		// TODO Auto-generated method stub
 		this.interfaces.add("\ninterface " + n.getNameAsString());
 	}
 
-	//	public void setClasses(ClassOrInterfaceDeclaration n) {
-	//		// TODO Auto-generated method stub
-	//		this.classes.add("\n class " + n.getNameAsString());
-	//	}
 
+	public void setClassNames(ClassOrInterfaceDeclaration n){
+			this.classNames.add(n.getNameAsString());
+	}
+
+	
+	public List<String> getClassNames(){
+		this.classNames.removeAll(Collections.singleton(null));  
+		return this.classNames;
+}
+	
 	public void setClasses(ClassOrInterfaceDeclaration n){
-		String classDeclaration = "\nclass " + n.getNameAsString() + "{\n";
+
+		String classDeclaration;
+
+		if(n.isInterface()){
+			classDeclaration = "\ninterface " + n.getNameAsString() + "{\n";
+
+		}
+		else{
+			classDeclaration = "\nclass " + n.getNameAsString() + "{\n";
+		}
 
 		VariableParser vp = new VariableParser();
 		vp.listVariables(n);
 
 		MethodDeclarationChecker md = new MethodDeclarationChecker();
 		md.setMethodsDetails(n);
-//		md.getMethodNames();
-//		md.getParameters();
-		
-		
+
 
 		for(String variable : vp.getVariables()){
 			classDeclaration += variable + "\n";
@@ -121,6 +140,37 @@ public class ClassesDeclarationChecker {
 
 	}
 
+	public void setUses(File file, List<String> classNames) {
+		// TODO Auto-generated method stub
+		try {
+			new VoidVisitorAdapter<Object>() {
+
+
+				@Override
+				public void visit(ClassOrInterfaceDeclaration n, Object arg) {
+					super.visit(n, arg);
+					MethodDeclarationChecker md = new MethodDeclarationChecker();
+//					md.setMethodsDetails(n);
+					md.setParameters(n, classNames);
+					setDependency(md.getUses());
+				}
+			}.visit(JavaParser.parse(file), null);
+		} catch (IOException e) {
+			new RuntimeException(e);
+
+		}
+	}
+
+	public void setDependency(List<String> uses) {
+		this.uses.addAll(uses);
+	}
+
+	public List<String> getDependency() {
+		this.uses.removeAll(Collections.singleton(null));  
+		return this.uses;
+	}
+
+	
 	public List<String> getExtensions() {
 		// TODO Auto-generated method stub
 		this.extensions.removeAll(Collections.singleton(null));  
@@ -142,4 +192,7 @@ public class ClassesDeclarationChecker {
 		// TODO Auto-generated method stub
 		return this.classes;
 	}
+
+
+
 }

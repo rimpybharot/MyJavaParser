@@ -13,7 +13,8 @@ public class PlantUMLNotationMaker {
 	private List<String> classes;
 	private List<String> interfaceImplentations;
 	private List<String> extendsImplementation;
-	private List<String> variables;
+	private List<String> classNames;
+	private List<String> dependencies;
 
 
 	private String umlTextNotation;
@@ -25,7 +26,8 @@ public class PlantUMLNotationMaker {
 		interfaceImplentations = new ArrayList<String>();
 		classes = new ArrayList<String>();
 		extendsImplementation = new ArrayList<String>();
-		variables = new ArrayList<String>();
+		classNames = new ArrayList<String>();
+		dependencies = new ArrayList<String>();
 
 
 		for (File file : javafiles){
@@ -38,16 +40,14 @@ public class PlantUMLNotationMaker {
 			interfaces.addAll(cdc.getInterfaces());
 			interfaceImplentations.addAll(cdc.getImplementations());
 			extendsImplementation.addAll(cdc.getExtensions());
-			
-			
-//			MethodDeclarationChecker mdc = new MethodDeclarationChecker();
-//			mdc.classReader(file);
-//			for(String s : mdc.getMethodDetails()){
-//				System.out.println(s);
-//			}
-			
+			classNames.addAll(cdc.getClassNames());
 		}
 
+		for (File file : javafiles){
+			ClassesDeclarationChecker cdc = new ClassesDeclarationChecker();
+			cdc.setUses(file, classNames);
+			dependencies.addAll(cdc.getDependency());
+		}
 
 		String plantUmlSource = new String();
 
@@ -63,13 +63,15 @@ public class PlantUMLNotationMaker {
 		}
 		for(String className : classes ){
 			plantUmlSource += className;
-
 		}
 		for(String extension : extendsImplementation ){
 			plantUmlSource += extension;
 
 		}
+		for(String dependency : dependencies ){
+			plantUmlSource += dependency;
 
+		}
 
 		//		plantUmlSource += " {\n";
 		//		plantUmlSource += "\n"+vp.listVariables(file);

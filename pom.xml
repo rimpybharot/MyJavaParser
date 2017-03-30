@@ -11,14 +11,12 @@
 			<artifactId>javaparser-core</artifactId>
 			<version>3.1.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>net.sourceforge.plantuml</groupId>
 			<artifactId>plantuml</artifactId>
 			<version>6703</version>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
@@ -45,7 +43,7 @@
 			</plugin>
 
 			<!-- package all dependencies into a single jar - creates 2 jars, one 
-				with and one without depen -->
+				with and one without dependencies -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
@@ -62,10 +60,6 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>net.sourceforge.plantuml</groupId>
-				<artifactId>plantuml</artifactId>
-			</plugin>
 			<plugin>
 				<groupId>net.sourceforge.plantuml</groupId>
 				<artifactId>plantuml</artifactId>

@@ -183,31 +183,6 @@ public class MethodDeclarationChecker {
 		this.methods.add(n);
 
 	}
-//
-//
-//
-//	public String createMethodString(List<String> methodFields){
-//		String finalVariable = null;
-//
-//		if(methodFields.size()>0){
-//			switch(methodFields.get(0).toString()){
-//			case "public" : methodFields.set(0, "+"); break;
-//			case "private" : methodFields.set(0, "-"); break;
-//			case "protected" : methodFields.set(0, "#"); break;
-//			case "package private" : methodFields.set(0, "~"); break;
-//			case "": methodFields.set(0, "~"); break;
-//			default: methodFields.set(0, "-"); break;
-//			}
-//			String name = methodFields.get(2).toString();
-//			String type = methodFields.get(1).toString();
-//			String modifier = methodFields.get(0).toString();
-//			finalVariable = modifier +" " + type + " : " + name;
-//			return finalVariable;
-//		}
-//		else{
-//			return "";
-//		}
-//	}
 
 	public void setMethodNames(String methodName){
 		this.methodNames.add(methodName);
@@ -222,66 +197,21 @@ public class MethodDeclarationChecker {
 
 	}
 
-//	public void setParameters(MethodDeclaration node){
-//			new VoidVisitorAdapter<Object>() {
-//
-//				@Override
-//				public void visit(Parameter node, Object arg) {
-//					super.visit(node, arg);
-//					System.out.println("type "+node.getType().toString());
-//					setParamaterType(node.getType().toString());
-//					
-//
-//				}
-//			}.visit(node, null);
-//		
-//	}
-
-
 	protected void setParamaterType(String parameterType) {
 		// TODO Auto-generated method stub
 		this.parameterType.add(parameterType);
 	}
 
-
-
-//
-//	public void getParametersDetails(){
-//		this.pm.removeAll(Collections.singleton(null));  
-//		for(Node parameter : this.pm){
-//			this.pmnames.add(parameter.toString());
-//
-//
-//		}
-//	}
-
 	public void setUsesRelation(){
 		this.methods.removeAll(Collections.singleton(null));  
 		for(MethodDeclaration m : this.methods){
 			this.methodNames.add(m.getNameAsString());
-//			System.out.println(m.getParameterByType("A1"));
-			
 		}
-
-
 	}
-
-
-
-//	public void setParameterDetails(){
-//		this.pm.removeAll(Collections.singleton(null));  
-//		for(Node p : this.pm){
-//			for(Node child: p.getChildNodes()){
-//				System.out.println("parameter is " + child.toString());
-//			}
-//		}
-//	}
 
 	public List<String> getParameters(){
 		this.pmnames.removeAll(Collections.singleton(null)); 
 		for(String parameter : pmnames){
-
-
 			System.out.println(parameter);
 		}
 		return pmnames;

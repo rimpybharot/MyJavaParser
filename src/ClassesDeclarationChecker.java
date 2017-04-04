@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.ClassDefinition;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,27 +18,29 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 public class ClassesDeclarationChecker {
 
 	private List<String> interfaces;
-	private List<String> classes;
+	private List<String> classifiers;
 	private List<String> implemntations;
 	private List<String> extensions;
 	private List<String> uses;
 	private List<String> classNames;
+	private List<String> associations;
 
 	public ClassesDeclarationChecker() {
 		// TODO Auto-generated constructor stub
 		this.interfaces = new ArrayList<String>();
-		this.classes = new ArrayList<String>();
+		this.classifiers = new ArrayList<String>();
 		this.implemntations = new ArrayList<String>();
 		this.extensions = new ArrayList<String>();
 		this.uses = new ArrayList<String>();
 		this.classNames = new ArrayList<String>();
+		this.associations = new ArrayList<String>();
 
 	}
 
 
 	public void classOrInterfaceFinder(File file) throws ParseException, IOException {
 
-		System.out.println("Reading file " + file.getName());
+//		System.out.println("Reading file " + file.getName());
 		try {
 			new VoidVisitorAdapter<Object>() {
 
@@ -47,17 +50,18 @@ public class ClassesDeclarationChecker {
 					super.visit(n, arg);
 					setClassNames(n);
 					if(n.isInterface()){
-						System.out.println("getting interface " + n.getNameAsString());
+//						System.out.println("getting interface " + n.getNameAsString());
 						setInterfaces(n);
 						setCommonMethods(n);
 					}
 					else{
-						System.out.println("getting classes and implementions and extensions for " + n.getNameAsString());
+						//						System.out.println("getting classes and implementions and extensions for " + n.getNameAsString());
 						setImplements(n);
 						setExtends(n);
-//						setUses(n);
+						//						setUses(n);
+//						setAssociation(n);
 					}
-					setClasses(n);
+					setClassifiers(n);
 				}
 			}.visit(JavaParser.parse(file), null);
 		} catch (IOException e) {
@@ -69,7 +73,7 @@ public class ClassesDeclarationChecker {
 
 	protected void setCommonMethods(ClassOrInterfaceDeclaration n) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 
@@ -98,16 +102,16 @@ public class ClassesDeclarationChecker {
 
 
 	public void setClassNames(ClassOrInterfaceDeclaration n){
-			this.classNames.add(n.getNameAsString());
+		this.classNames.add(n.getNameAsString());
 	}
 
-	
+
 	public List<String> getClassNames(){
 		this.classNames.removeAll(Collections.singleton(null));  
 		return this.classNames;
-}
-	
-	public void setClasses(ClassOrInterfaceDeclaration n){
+	}
+
+	public void setClassifiers(ClassOrInterfaceDeclaration n){
 
 		String classDeclaration;
 
@@ -135,11 +139,14 @@ public class ClassesDeclarationChecker {
 		}
 		classDeclaration += "}";
 
-		this.classes.add(classDeclaration);
+		this.classifiers.add(classDeclaration);
 
 
 	}
-
+	public void setAssociation(Collection<? extends String> association) {
+		// TODO Auto-generated method stub
+			this.associations.addAll(association);
+	}
 	public void setUses(File file, List<String> classNames) {
 		// TODO Auto-generated method stub
 		try {
@@ -150,7 +157,7 @@ public class ClassesDeclarationChecker {
 				public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 					super.visit(n, arg);
 					MethodDeclarationChecker md = new MethodDeclarationChecker();
-//					md.setMethodsDetails(n);
+					//					md.setMethodsDetails(n);
 					md.setParameters(n, classNames);
 					setDependency(md.getUses());
 				}
@@ -170,7 +177,7 @@ public class ClassesDeclarationChecker {
 		return this.uses;
 	}
 
-	
+
 	public List<String> getExtensions() {
 		// TODO Auto-generated method stub
 		this.extensions.removeAll(Collections.singleton(null));  
@@ -188,11 +195,14 @@ public class ClassesDeclarationChecker {
 		return this.interfaces;
 	}
 
-	public List<String> getClasses() {
+	public List<String> getClassifiers() {
 		// TODO Auto-generated method stub
-		return this.classes;
+		return this.classifiers;
 	}
-
+	public List<String> getAssociation() {
+		// TODO Auto-generated method stub
+		return this.classifiers;
+	}
 
 
 }

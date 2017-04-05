@@ -1,37 +1,50 @@
 
 import java.io.File;
 
+
 import java.io.IOException;
-import java.lang.instrument.ClassDefinition;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 public class ClassesDeclarationChecker {
 
+	
+	private HashMap<ClassOrInterfaceDeclaration, List<MethodDeclaration>> classesMethods;
+	private HashMap<ClassOrInterfaceDeclaration, List<ConstructorDeclaration>> classesConstructors;
+
+	private HashMap<ClassOrInterfaceDeclaration, List<FieldDeclaration>> classesVariables;
+	private HashMap<ClassOrInterfaceDeclaration, List<String>> classesImplements;
+
+	private List<ClassOrInterfaceDeclaration> classesOrInterfaces;
 	private List<String> interfaces;
 	private List<String> classifiers;
-	private List<String> implemntations;
 	private List<String> extensions;
-	private List<String> uses;
 	private List<String> classNames;
 	private List<String> associations;
 
 	public ClassesDeclarationChecker() {
 		// TODO Auto-generated constructor stub
+		this.classesMethods = new HashMap<ClassOrInterfaceDeclaration, List<MethodDeclaration>>();
+		this.classesVariables = new HashMap<ClassOrInterfaceDeclaration, List<FieldDeclaration>>();
+		this.classesImplements = new HashMap<ClassOrInterfaceDeclaration, List<String>>();
+		this.classesConstructors = new HashMap<ClassOrInterfaceDeclaration, List<ConstructorDeclaration>>();
+		this.classesOrInterfaces = new ArrayList<>();
+
 		this.interfaces = new ArrayList<String>();
 		this.classifiers = new ArrayList<String>();
-		this.implemntations = new ArrayList<String>();
 		this.extensions = new ArrayList<String>();
-		this.uses = new ArrayList<String>();
 		this.classNames = new ArrayList<String>();
 		this.associations = new ArrayList<String>();
 
@@ -39,29 +52,22 @@ public class ClassesDeclarationChecker {
 
 
 	public void classOrInterfaceFinder(File file) throws ParseException, IOException {
-
-//		System.out.println("Reading file " + file.getName());
 		try {
 			new VoidVisitorAdapter<Object>() {
-
-
 				@Override
 				public void visit(ClassOrInterfaceDeclaration n, Object arg) {
 					super.visit(n, arg);
-					setClassNames(n);
+					setClassesOrInterfaces(n);
 					if(n.isInterface()){
-//						System.out.println("getting interface " + n.getNameAsString());
 						setInterfaces(n);
-						setCommonMethods(n);
 					}
 					else{
-						//						System.out.println("getting classes and implementions and extensions for " + n.getNameAsString());
 						setImplements(n);
 						setExtends(n);
-						//						setUses(n);
-//						setAssociation(n);
+						setFields(n);
 					}
 					setClassifiers(n);
+					setOperations(n);
 				}
 			}.visit(JavaParser.parse(file), null);
 		} catch (IOException e) {
@@ -70,16 +76,43 @@ public class ClassesDeclarationChecker {
 		}
 	}
 
+	public void setClassesOrInterfaces(ClassOrInterfaceDeclaration n){
+		this.classesOrInterfaces.add(n);
+	}
+	
+	public List<ClassOrInterfaceDeclaration> getClassesORInterfaces(){
+		return this.classesOrInterfaces;
+	}
+	public void setOperations(ClassOrInterfaceDeclaration n) {
+		MethodDeclarationChecker md = new MethodDeclarationChecker(n);
+		this.classesMethods.put(n, md.getClassesMethods());
+		ConstructorChecker cd = new ConstructorChecker(n);
+		this.classesConstructors.put(n, cd.getClassesConstructor());
+		
+	}
 
-	protected void setCommonMethods(ClassOrInterfaceDeclaration n) {
-		// TODO Auto-generated method stub
+	public void setFields(ClassOrInterfaceDeclaration n) {
+		FieldParser fp = new FieldParser(n);
+		this.classesVariables.put(n, fp.getFields());
+	}
 
+
+	public HashMap<ClassOrInterfaceDeclaration, List<MethodDeclaration>> getMethods() {
+		this.classesMethods.remove(Collections.singleton(null));  
+		return this.classesMethods;
+	}
+	public HashMap<ClassOrInterfaceDeclaration, List<ConstructorDeclaration>> getConstructors() {
+		this.classesMethods.remove(Collections.singleton(null));  
+		return this.classesConstructors;
+	}
+
+	public HashMap<ClassOrInterfaceDeclaration, List<FieldDeclaration>> getFields() {
+		this.classesVariables.remove(Collections.singleton(null));  
+		return this.classesVariables;
 	}
 
 
 	public void setExtends(ClassOrInterfaceDeclaration n) {
-		// TODO Auto-generated method stub
-		//		extendsClass = n.getExtendedTypes();
 		for(ClassOrInterfaceType citype : n.getExtendedTypes()){
 			if(citype != null){
 				this.extensions.add("\n"+citype.getNameAsString() + " <|-- " + n.getNameAsString());
@@ -89,27 +122,22 @@ public class ClassesDeclarationChecker {
 	}
 
 	public void setImplements(ClassOrInterfaceDeclaration n) {
+
+		this.classesImplements.put(n, new ArrayList<String>());
+		
 		for(ClassOrInterfaceType citype : n.getImplementedTypes()){
 			if(citype != null){
-				this.implemntations.add("\n"+ citype.getNameAsString()+ " <|.. " + n.getNameAsString());
+				this.classesImplements.get(n).add(citype.getNameAsString());
 			}
 		}
+
+
 	}
 
 	public void setInterfaces(ClassOrInterfaceDeclaration n) {
-		this.interfaces.add("\ninterface " + n.getNameAsString());
+		this.interfaces.add(n.getNameAsString());
 	}
 
-
-	public void setClassNames(ClassOrInterfaceDeclaration n){
-		this.classNames.add(n.getNameAsString());
-	}
-
-
-	public List<String> getClassNames(){
-		this.classNames.removeAll(Collections.singleton(null));  
-		return this.classNames;
-	}
 
 	public void setClassifiers(ClassOrInterfaceDeclaration n){
 
@@ -122,61 +150,12 @@ public class ClassesDeclarationChecker {
 		else{
 			classDeclaration = "\nclass " + n.getNameAsString() + "{\n";
 		}
-
-		VariableParser vp = new VariableParser();
-		vp.listVariables(n);
-
-		MethodDeclarationChecker md = new MethodDeclarationChecker();
-		md.setMethodsDetails(n);
-
-
-		for(String variable : vp.getVariables()){
-			classDeclaration += variable + "\n";
-		}
-
-		for(String method : md.getMethodNames()){
-			classDeclaration += method + "\n";
-		}
 		classDeclaration += "}";
 
 		this.classifiers.add(classDeclaration);
 
 
 	}
-	public void setAssociation(Collection<? extends String> association) {
-		// TODO Auto-generated method stub
-			this.associations.addAll(association);
-	}
-	public void setUses(File file, List<String> classNames) {
-		// TODO Auto-generated method stub
-		try {
-			new VoidVisitorAdapter<Object>() {
-
-
-				@Override
-				public void visit(ClassOrInterfaceDeclaration n, Object arg) {
-					super.visit(n, arg);
-					MethodDeclarationChecker md = new MethodDeclarationChecker();
-					//					md.setMethodsDetails(n);
-					md.setParameters(n, classNames);
-					setDependency(md.getUses());
-				}
-			}.visit(JavaParser.parse(file), null);
-		} catch (IOException e) {
-			new RuntimeException(e);
-
-		}
-	}
-
-	public void setDependency(List<String> uses) {
-		this.uses.addAll(uses);
-	}
-
-	public List<String> getDependency() {
-		this.uses.removeAll(Collections.singleton(null));  
-		return this.uses;
-	}
-
 
 	public List<String> getExtensions() {
 		// TODO Auto-generated method stub
@@ -184,10 +163,10 @@ public class ClassesDeclarationChecker {
 		return this.extensions;
 	}
 
-	public List<String> getImplementations() {
+	public HashMap<ClassOrInterfaceDeclaration, List<String>> getImplementations() {
 		// TODO Auto-generated method stub
-		this.implemntations.removeAll(Collections.singleton(null));  
-		return this.implemntations;
+		this.classesImplements.remove(Collections.singleton(null));  
+		return this.classesImplements;
 	}
 
 	public List<String> getInterfaces() {
@@ -199,10 +178,4 @@ public class ClassesDeclarationChecker {
 		// TODO Auto-generated method stub
 		return this.classifiers;
 	}
-	public List<String> getAssociation() {
-		// TODO Auto-generated method stub
-		return this.classifiers;
-	}
-
-
 }

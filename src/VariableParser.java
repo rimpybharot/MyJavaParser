@@ -1,160 +1,112 @@
-import java.io.File;
-
-import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ParseException;
-import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.NodeList;
+
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.InstanceOfExpr;
-import com.github.javaparser.ast.type.ArrayType;
-import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-public class VariableParser{
-	private List<String> variables;
-	private NodeList<VariableDeclarator> variablesDetails;
+public class VariableParser {
 
 
 
-	public void listVariables(ClassOrInterfaceDeclaration cd) {
-		variables = new ArrayList<String>();
-		variablesDetails = new NodeList<VariableDeclarator>();
+	List<String> association = new ArrayList<>();
+	HashMap<String, List<String>> associations = new HashMap<String, List<String>>();
+	String cardinality;
+	List<FieldDeclaration> removeFields;
 
-
+	public VariableParser(ClassOrInterfaceDeclaration cd, List<String> classifierNames) {
+		cardinality = "";
+		removeFields = new ArrayList<FieldDeclaration>();
+		System.out.println("*****\nClass " + cd.getNameAsString());
 		new VoidVisitorAdapter<Object>() {
+			public void visit(FieldDeclaration fd, Object arg) {
+				for(VariableDeclarator v : fd.getVariables()){
+					String typeOfVariable = v.getType().getClass().getSimpleName();
+					String relatedClass = new String();
+					switch(typeOfVariable){
+					case "ClassOrInterfaceType" :
+						String varaibleType = v.getType().toString();
+						if(varaibleType.contains("Collection")
+								|| varaibleType.contains("Set")
+								|| varaibleType.contains("HashMap")
+								|| varaibleType.contains("Map")
+								|| varaibleType.contains("List")
+								|| varaibleType.contains("ArrayList")){
+//							System.out.println(varaibleType);
+							relatedClass = (varaibleType.substring(varaibleType.indexOf("<") + 1,
+									varaibleType.indexOf(">")));
+//							System.out.println("Related Class is " + relatedClass);
+							cardinality = "0..*";
+							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
+							setFieldsToBeRemoved(fd);
 
-			String type = null;
-			String name = null;
-			String modifier = "";
+						}
+						else if(varaibleType.contains("[") && varaibleType.contains("]")){
+							cardinality = (varaibleType.substring(varaibleType.indexOf("[") + 1,
+									varaibleType.indexOf("]")));	
+							relatedClass = fd.getElementType().toString();
+							setFieldsToBeRemoved(fd);
 
-			public void visit(FieldDeclaration n, Object arg) {
-				List<String> fields = new ArrayList<String>();
+							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
+						}
+						else if(!varaibleType.contains("String")){
+							relatedClass = fd.getElementType().toString();
+							cardinality = "1";
+							setFieldsToBeRemoved(fd);
 
-				variablesDetails = n.getVariables();
-				setMultiplicity(variablesDetails);
+							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
 
 
-				for(VariableDeclarator v : variablesDetails){
-//					System.out.println("name is " + v.getNameAsString());
-//					System.out.println("type is " + v.getType());
+						}
+						break;
+					default : ; break;
+					}
 
-					name = v.getNameAsString();
-					type = v.getType().toString();
 				}
-					if(n.isPrivate()){
-						modifier ="-";
-					}
-					else if(n.isPublic()){
-						modifier ="+";
-					}
-					else if(n.isProtected()){
-						modifier ="#";
-					}
-					fields.add(modifier);
-					if(name!=null){
-						fields.add(name);	
-					}
-					if(type!=null){
-						fields.add(type);
-					}
-					setVariables(modifier +" " + name + " : " + type);
-				}
-			}.visit(cd, null);
-		}
 
-		public void listParameters(ClassOrInterfaceDeclaration cd) {
-			variables = new ArrayList<String>();
-			variablesDetails = new NodeList<VariableDeclarator>();
-
-
-			new VoidVisitorAdapter<Object>() {
-				public void visit(Parameter n, Object arg) {
-					System.out.println("the type is " + n.getType().toString());
-				}
-			}.visit(cd, null);
-		}
-
-		protected void setMultiplicity(NodeList<VariableDeclarator> variablesDetails) {
-			// TODO Auto-generated method stub
-
-
-			for(VariableDeclarator vd : variablesDetails){
-				//			System.out.println("vd " + vd);
-				new VoidVisitorAdapter<Object>() {
-					public void visit(VariableDeclarator vd, Object arg) {
-						Object a = vd.getType();
-						Type t = vd.getType().getElementType();
-//						System.out.println(a.getClass().getSimpleName());
-//						System.out.println("type of variable " + t);
-//						System.out.println("Element type " + a.getClass());
-//						System.out.println(vd1.getClass().getName());
-//						System.out.println(t.toString().contains("Collection"));
-					}
-				}.visit(vd, null);
 			}
+		}.visit(cd, null);
+	}
+
+	public void setFieldsToBeRemoved(FieldDeclaration fd) {
+		this.removeFields.add(fd);
+	}
+
+	public void setAssociation(ClassOrInterfaceDeclaration cd,
+			String classifier, String cardinality, String objectName) {
+		List<String> values = new ArrayList<>();
+
+		values.add(classifier);
+		values.add(cardinality);
+		this.associations.put(cd.getNameAsString(), values);
+
+		if(cardinality==""){
+			this.association.add("\n"+cd.getNameAsString()+"--"+classifier
+					//					+":"+objectName
+					+"\n");
 		}
-
-
-		public void setVariables(String string) {
-			// TODO Auto-generated method stub
-			this.variables.add(string);
-
+		else{
+			this.association.add("\n"+cd.getNameAsString()+"--"+"\""+cardinality+"\""+classifier
+					//				+":"+objectName
+					+"\n");
 		}
-
-		public List<String> getVariables(){
-			return this.variables;
-		}
-
-
-		public String createVarString(List<String> variableDefinition){
-			String finalVariable = null;
-
-			if(variableDefinition.size()>0){
-				switch(variableDefinition.get(0).toString()){
-				case "public" : variableDefinition.set(0, "+"); break;
-				case "private" : variableDefinition.set(0, "-"); break;
-				case "protected" : variableDefinition.set(0, "#"); break;
-				case "package private" : variableDefinition.set(0, "~"); break;
-				case "": variableDefinition.set(0, "~"); break;
-				default: variableDefinition.set(0, "-"); break;
-				}
-				String name = variableDefinition.get(2).toString();
-				String type = variableDefinition.get(1).toString();
-				String modifier = variableDefinition.get(0).toString();
-				finalVariable = modifier +" " + type + " : " + name;
-				return finalVariable;
-			}
-			else{
-				return "";
-			}
-
-
-
-		}
-
-		public void listComments(File file) throws ParseException, IOException {
-
-			new VoidVisitorAdapter<Object>() {
-				public void visit(com.github.javaparser.ast.comments.LineComment n, Object arg) {
-					super.visit(n, arg);
-
-					System.out.println(n.toString());
-
-				}
-			}.visit(JavaParser.parse(file), null);
-
-
-
-		}
-
 
 	}
+	public List<String> getAssociation() {
+		// TODO Auto-generated method stub
+		return this.association;
+
+	}
+	
+	public HashMap<String, List<String>> getAssociations() {
+		// TODO Auto-generated method stub
+		return this.associations;
+
+	}
+
+	public List<FieldDeclaration> getFieldsToBeRemoved(){
+		return this.removeFields;
+	}
+}

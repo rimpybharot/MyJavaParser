@@ -1,33 +1,31 @@
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 public class MethodDeclarationChecker {
 
 
 	private List<MethodDeclaration> methods;
+
 	private List<String> methodNames;
 	private NodeList<Parameter> parameters;
 	private List<String> pmnames;
 	private List<String> parameterType;
 	private List<String> usesRelation;
 
+	public MethodDeclarationChecker(){};
 
-	public MethodDeclarationChecker() {
-		// TODO Auto-generated constructor stub
+
+	public MethodDeclarationChecker(ClassOrInterfaceDeclaration n){
 		this.methods = new ArrayList<MethodDeclaration>();
 		this.methodNames = new ArrayList<String>();
 		this.parameters = new NodeList<>();
@@ -35,152 +33,64 @@ public class MethodDeclarationChecker {
 		this.parameterType = new ArrayList<String>();
 		this.usesRelation = new ArrayList<String>();
 
-	}
-
-
-	public void setConstructor(ClassOrInterfaceDeclaration n){
-
-
 		new VoidVisitorAdapter<Object>() {
-			@Override
-			public void visit(ConstructorDeclaration n, Object arg) {
-				super.visit(n, arg);
-				String p1 ="";
-				parameters = n.getParameters();
-				
-
-				String name = null;
-
-				
-				for(Parameter p : parameters){
-					p1 += p.getNameAsString() + ": " + p.getType();
-					
-				}
-				name = n.getNameAsString() + "("+p1+")";
-				setMethodNames(name);
-
-
-				}
-
-		}.visit(n, null);
-	}
-	public void setMethodsDetails(ClassOrInterfaceDeclaration n){
-
-
-		setConstructor(n);
-		new VoidVisitorAdapter<Object>() {
-
-			
-			
-			String type = null;
-			String name = null;
-			String modifier = null;
-//			private List<String> parameterType 
-
 			@Override
 			public void visit(MethodDeclaration n, Object arg) {
 				super.visit(n, arg);
-				
-//				List<String> fields = new ArrayList<String>();
-				setMethods(n);
-
-				String p1 ="";
-				parameters = n.getParameters();
-				
-				
-				
-				for(Parameter p : parameters){
-//					System.out.println("parameters " + p.getType());
-					p1 += p.getNameAsString() + ": " + p.getType();
-					
-				}
-				name = n.getNameAsString() + "("+p1+")";
-				type = n.getType().toString();
-				modifier = "";
-				if(n.isPrivate()){
-					modifier ="-";
-				}
-				else if(n.isPublic()){
-					modifier ="+";
-				}
-				else if(n.isProtected()){
-					modifier ="#";
-				}
-				setMethodNames(modifier +" " + name + " : " + type);
-			}
-
-		}.visit(n, null);
-	}
-
-
-	protected void setParameters(ClassOrInterfaceDeclaration n, List<String> classNames) {
-
-		if(!n.isInterface()){
-			
-		new VoidVisitorAdapter<Object>() {
-
-			String className = n.getNameAsString();
-
-			@Override
-			public void visit(MethodDeclaration n, Object arg) {
-				super.visit(n, arg);
-
-				NodeList<Parameter> parameters = n.getParameters();
-				
-				
-				
-				for(Parameter p : parameters){
-					if(classNames.contains(p.getType().toString())){
-						String relation = "\n"+className + "--" + p.getType().toString()+"\n";
-						setUses(relation);
-					}
-					
-				}
-
-			}
-		}.visit(n, null);
-		
-		new VoidVisitorAdapter<Object>() {
-
-			String className = n.getNameAsString();
-
-			@Override
-			public void visit(ConstructorDeclaration n, Object arg) {
-				super.visit(n, arg);
-				NodeList<Parameter> parameters = n.getParameters();
-				for(Parameter p : parameters){
-					if(classNames.contains(p.getType().toString())){
-						setUses("\n"+className + "--" + p.getType().toString()+"\n");
-					}
-					
-				}
-
+				setClassesMethods(n);
 			}
 		}.visit(n, null);
 	}
-		
-}
+
+	public String methodStringCreator(MethodDeclaration n){
+
+
+		String type = null;
+		String name = null;
+		String modifier = null;
+		getGetters(n);
+		getSetters(n);
+
+		String p1 ="";
+		parameters = n.getParameters();
 
 
 
+		for(Parameter p : parameters){
+			//			System.out.println("parameters " + p.getType());
+			p1 += p.getNameAsString() + ": " + p.getType();
 
-	protected void setUses(String uses) {
-		// TODO Auto-generated method stub
-		if(!this.usesRelation.contains(uses)){
-		this.usesRelation.add(uses);}
-		
-	}
-
-	public List<String> getUses(){
-		this.usesRelation.removeAll(Collections.singleton(null));
-		for(String m : this.usesRelation){
-			System.out.println(m);
 		}
-		return this.usesRelation;
+		name = n.getNameAsString() + "("+p1+")";
+		type = n.getType().toString();
+		modifier = "";
+		if(n.isPrivate()){
+			modifier ="-";
+		}
+		else if(n.isPublic()){
+			modifier ="+";
+		}
+		else if(n.isProtected()){
+			modifier ="#";
+		}
+		return modifier +" " + name + " : " + type;
 
 	}
-	public void setMethods(MethodDeclaration n){
+
+
+	public void setClassesMethods(MethodDeclaration n) {
+		// TODO Auto-generated method stub
 		this.methods.add(n);
+		
+	}
+
+
+//	public void setMethods(MethodDeclaration n){
+//		this.methods.add(n);
+//
+//	}
+	public List<MethodDeclaration> getClassesMethods(){
+		return this.methods;
 
 	}
 
@@ -190,14 +100,12 @@ public class MethodDeclarationChecker {
 
 	public List<String> getMethodNames(){
 		this.methodNames.removeAll(Collections.singleton(null));
-		for(String m : this.methodNames){
-//			System.out.println(m);
-		}
+
 		return this.methodNames;
 
 	}
 
-	protected void setParamaterType(String parameterType) {
+	public void setParamaterType(String parameterType) {
 		// TODO Auto-generated method stub
 		this.parameterType.add(parameterType);
 	}
@@ -211,33 +119,42 @@ public class MethodDeclarationChecker {
 
 	public List<String> getParameters(){
 		this.pmnames.removeAll(Collections.singleton(null)); 
-		for(String parameter : pmnames){
-			System.out.println(parameter);
-		}
 		return pmnames;
 	}
 
+	public void getGetters(MethodDeclaration n){
+		String methodString = n.getDeclarationAsString();
+		if(methodString.toLowerCase().contains("get")){
 
-	public void getGetters(){
-		for (String method: this.methodNames){
-			String methodString = method.toString();
-			if(methodString.contains("get")){
-				//				System.out.println(methodString);	
-				int indexEnd = methodString.lastIndexOf(";");
-				int indexBegin = methodString.lastIndexOf("return");
-				System.out.println(methodString.substring(indexBegin + 7,indexEnd));
-			}
+
+			//			System.out.println(methodString);
+
+			//			new VoidVisitorAdapter<Object>() {
+			//				@Override
+			//				public void visit(VariableDeclarationExpr n, Object arg) {
+			//					super.visit(n, arg);
+			//					System.out.println(n);
+			//				}
+
+			//			}.visit(n, null);
 		}
 	}
-	public void getSetters(){
-		for (String method: this.methodNames){
-			String methodString = method.toString();
-			if(methodString.contains("set")){
-				//				System.out.println(methodString);
-				int indexEnd = methodString.lastIndexOf("=");
-				int indexBegin = methodString.indexOf("{");
-				System.out.println((methodString.substring(indexBegin + 1, indexEnd - 1)).trim());
-			}
+
+	public void getSetters(MethodDeclaration n){
+		String methodString = n.getDeclarationAsString();
+		if(methodString.toLowerCase().contains("set")){
+			//			System.out.println(methodString);
+			//			int indexEnd = methodString.lastIndexOf("=");
+			//			int indexBegin = methodString.indexOf("{");
+			//			System.out.println((methodString.substring(indexBegin + 1, indexEnd - 1)).trim());
+			//		}
+			new VoidVisitorAdapter<Object>() {
+				@Override
+				public void visit(VariableDeclarationExpr n, Object arg) {
+					super.visit(n, arg);
+				}
+
+			}.visit(n, null);
 		}
 	}
 }

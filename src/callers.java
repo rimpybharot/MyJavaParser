@@ -74,9 +74,9 @@ public class callers {
 
 		/*Code for Association*/
 		
-		Association association = new Association(associationsList);
+		Association association = new Association(associationsList, this.classifierNames);
 		
-		for(ArrayList<String> relation : finalRel){
+		for(ArrayList<String> relation : association.finalRel){
 			String associati = "";
 			for(String s : relation){
 				associati+=s;

@@ -24,7 +24,7 @@ public class DependencyGetter {
 //		}
 		String className = n.getNameAsString();
 
-//		if(!n.isInterface()){
+		if(!n.isInterface()){
 			new VoidVisitorAdapter<Object>() {
 				@Override
 				public void visit(MethodDeclaration n, Object arg) {
@@ -34,11 +34,12 @@ public class DependencyGetter {
 						if(interfaces.toString().contains(p.getType().toString())){
 							dependencies.add("\n"+className + "..>" + p.getType().toString()+":uses\n");
 						}
-
+					
 					}
 
 				}
 			}.visit(n, null);
+		}
 
 			new VoidVisitorAdapter<Object>() {
 

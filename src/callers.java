@@ -1,21 +1,15 @@
-
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 
 public class callers {
 
@@ -24,11 +18,12 @@ public class callers {
 	private HashMap<ClassOrInterfaceDeclaration, List<ConstructorDeclaration>> classesConstructors;
 	private HashMap<ClassOrInterfaceDeclaration, List<String>> classesImplements;
 	private HashMap<ClassOrInterfaceDeclaration, List<FieldDeclaration>> classesFields;
-	private HashMap<ClassOrInterfaceDeclaration, List<FieldDeclaration>> removeFields;
 	private List<String> extendsImplementation;
 	private List<String> interfaces;
 	private List<ClassOrInterfaceDeclaration> classesOrInterfaces;
 	private List<String> classifierNames ;
+	private HashMap<String, ArrayList<String>> associationsList = new HashMap<>();
+	private List<ArrayList<String>> finalRel = new ArrayList<ArrayList<String>>();
 
 	public callers(List<File> javafiles) throws ParseException, IOException{
 
@@ -43,9 +38,6 @@ public class callers {
 		interfaces = new ArrayList<String>();
 		classesOrInterfaces = new ArrayList<>();
 		classifierNames = new ArrayList<>();
-		removeFields = new HashMap<>();
-
-
 
 		for(File file : javafiles){
 			ClassesDeclarationChecker cdc = new ClassesDeclarationChecker();
@@ -71,21 +63,25 @@ public class callers {
 		}
 		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
 			VariableParser vp = new VariableParser(ci, this.classifierNames);
+			associationsList.putAll(vp.getAssociations());
 			List<FieldDeclaration> fd = this.classesFields.get(ci);
 			if(vp.getFieldsToBeRemoved()!=null && fd!=null){
 				fd.removeAll(vp.getFieldsToBeRemoved());
 			}
-			for(String association : vp.getAssociation()){
-				plantUmlSource += association;
-			}
+		}
 
-			for (Entry<String, List<String>> entry : vp.getAssociations().entrySet()) {
-				for(String inter : entry.getValue()){
-					if(entry.getKey()==inter){
-						System.out.println(inter);
-					}
-				}
+
+
+		/*Code for Association*/
+		
+		Association association = new Association(associationsList);
+		
+		for(ArrayList<String> relation : finalRel){
+			String associati = "";
+			for(String s : relation){
+				associati+=s;
 			}
+			plantUmlSource += associati+"\n";
 		}
 
 		for(String extension : extendsImplementation ){

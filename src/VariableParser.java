@@ -8,50 +8,56 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 public class VariableParser {
-
-
-
 	List<String> association = new ArrayList<>();
-	HashMap<String, List<String>> associations = new HashMap<String, List<String>>();
+	HashMap<String, ArrayList<String>> associations = new HashMap<String, ArrayList<String>>();
 	String cardinality;
 	List<FieldDeclaration> removeFields;
+	ArrayList<String> relatedClasses = new ArrayList<String>();
 
 	public VariableParser(ClassOrInterfaceDeclaration cd, List<String> classifierNames) {
+
+		//		System.out.println(classifierNames);
+		//		System.out.println(cd.getNameAsString());
+
 		cardinality = "";
 		removeFields = new ArrayList<FieldDeclaration>();
-		System.out.println("*****\nClass " + cd.getNameAsString());
 		new VoidVisitorAdapter<Object>() {
 			public void visit(FieldDeclaration fd, Object arg) {
 				for(VariableDeclarator v : fd.getVariables()){
 					String typeOfVariable = v.getType().getClass().getSimpleName();
+
 					String relatedClass = new String();
 					switch(typeOfVariable){
 					case "ClassOrInterfaceType" :
-						String varaibleType = v.getType().toString();
-						if(varaibleType.contains("Collection")
-								|| varaibleType.contains("Set")
-								|| varaibleType.contains("HashMap")
-								|| varaibleType.contains("Map")
-								|| varaibleType.contains("List")
-								|| varaibleType.contains("ArrayList")){
-//							System.out.println(varaibleType);
-							relatedClass = (varaibleType.substring(varaibleType.indexOf("<") + 1,
-									varaibleType.indexOf(">")));
-//							System.out.println("Related Class is " + relatedClass);
+						//						System.out.println(fd.toString());
+						//						System.out.println(cd.getNameAsString()+"///"+v.getNameAsString());
+						//						System.out.println(v.getType().toString());
+						//						String variableType = v.getType().toString();
+						String variableType = fd.toString();
+						//						System.out.println(variableType);
+						if(variableType.contains("Collection")
+								|| variableType.contains("Set")
+								|| variableType.contains("HashMap")
+								|| variableType.contains("Map")
+								|| variableType.contains("List")
+								|| variableType.contains("ArrayList")){
+							relatedClass = (variableType.substring(variableType.indexOf("<") + 1,
+									variableType.indexOf(">")));
 							cardinality = "0..*";
 							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
 							setFieldsToBeRemoved(fd);
+							//							System.out.println(relatedClass);
 
 						}
-						else if(varaibleType.contains("[") && varaibleType.contains("]")){
-							cardinality = (varaibleType.substring(varaibleType.indexOf("[") + 1,
-									varaibleType.indexOf("]")));	
+						else if(variableType.contains("[") && variableType.contains("]")){
+							cardinality = (variableType.substring(variableType.indexOf("[") + 1,
+									variableType.indexOf("]")));	
 							relatedClass = fd.getElementType().toString();
 							setFieldsToBeRemoved(fd);
 
 							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
 						}
-						else if(!varaibleType.contains("String")){
+						else if(!variableType.contains("String")){
 							relatedClass = fd.getElementType().toString();
 							cardinality = "1";
 							setFieldsToBeRemoved(fd);
@@ -76,12 +82,13 @@ public class VariableParser {
 
 	public void setAssociation(ClassOrInterfaceDeclaration cd,
 			String classifier, String cardinality, String objectName) {
-		List<String> values = new ArrayList<>();
 
+
+		ArrayList<String> values = new ArrayList<String>();
 		values.add(classifier);
 		values.add(cardinality);
-		this.associations.put(cd.getNameAsString(), values);
-
+		this.relatedClasses.addAll(values);
+		this.associations.put(cd.getNameAsString(), this.relatedClasses);
 		if(cardinality==""){
 			this.association.add("\n"+cd.getNameAsString()+"--"+classifier
 					//					+":"+objectName
@@ -95,13 +102,11 @@ public class VariableParser {
 
 	}
 	public List<String> getAssociation() {
-		// TODO Auto-generated method stub
 		return this.association;
 
 	}
-	
-	public HashMap<String, List<String>> getAssociations() {
-		// TODO Auto-generated method stub
+
+	public HashMap<String, ArrayList<String>> getAssociations() {
 		return this.associations;
 
 	}

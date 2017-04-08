@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,71 +32,74 @@ public class Realization {
 				entry.getValue().removeAll(classesMethodsRefined);
 			}
 		}
-		
+
 	}
 
 	public List<MethodDeclaration> getCommonMethods(String className, String interfaceName) {
 		List<MethodDeclaration> classMethods = new ArrayList<>();
 		List<MethodDeclaration> interfaceMethods = new ArrayList<>();
 		List<MethodDeclaration> classesMethodsRefined = new ArrayList<>();
-
-		//		////System.out.println("My class name " + className);
-		//		////System.out.println("My interface name " + interfaceName);
+		List<MethodDeclaration> finalMethods = new ArrayList<>();
 
 		for(Entry<ClassOrInterfaceDeclaration, List<MethodDeclaration>> entry:
 			this.classesMethods.entrySet()){
 			if(entry.getKey().getNameAsString().equals(interfaceName)){
-				//				////System.out.println("Found the interface");
 				interfaceMethods = entry.getValue();
 			}
 			if(entry.getKey().getNameAsString().equals(className)){
-				//				////System.out.println("Found the class");
 				classMethods = entry.getValue();
+				classesMethodsRefined = entry.getValue();
 			}
 
 		}
-		
+
 		List<MethodDeclaration> commonMethods = new ArrayList<>();
-		
+
 		for (MethodDeclaration interfaceMethod : interfaceMethods){
-//			////System.out.println("interface method " +interfaceMethod.getNameAsString());
-			for(MethodDeclaration classMethod : classMethods){
-//				////System.out.println("checking method " + classMethod.getNameAsString());
-				if (interfaceMethod.getNameAsString().equals(classMethod.getNameAsString())){
-//					////System.out.println("Found " + interfaceMethod.getNameAsString());
-					commonMethods.add(interfaceMethod);
+			if(!interfaceMethod.isAbstract()){
+				for(MethodDeclaration classMethod : classMethods){
+					if (interfaceMethod.getNameAsString().equals(classMethod.getNameAsString())){
+						commonMethods.add(interfaceMethod);
+						break;
+					}
+					else{
+						////System.out.println("not found");
+					}
+				}
+			}
+		}
+
+		Iterator<MethodDeclaration> allMethods = classesMethodsRefined.iterator();
+
+		while (allMethods.hasNext()) {
+			MethodDeclaration all = allMethods.next();
+			Iterator<MethodDeclaration> commons = commonMethods.iterator();
+			boolean isNotCommon = true;
+
+			while (commons.hasNext()) {
+				MethodDeclaration common = commons.next();
+				if((all.getNameAsString().equals(common.getNameAsString()))){
+					isNotCommon = false;
 					break;
 				}
-				else{
-					//System.out.println("not found");
-				}
+			}
+			if(isNotCommon && (!finalMethods.contains(all))){
+				finalMethods.add(all);
 			}
 		}
-		for(MethodDeclaration m : commonMethods){
+		setRefinedMethods(className, finalMethods);
+		return finalMethods;
+	}
 
-			System.out.println("common for "+ className + "   " +m.getNameAsString());
-			
-		}
-		for(MethodDeclaration m : interfaceMethods){
-
-			System.out.println("interfaceMethods for " + interfaceName + "  " +m.getNameAsString());
-		}
-
+	private void setRefinedMethods(String className, List<MethodDeclaration> finalMethods) {
 		for(Entry<ClassOrInterfaceDeclaration, List<MethodDeclaration>> entry:
 			this.classesMethods.entrySet()){
-			
-			entry.getValue().removeAll(commonMethods);
-			
-			if(entry.getKey().getNameAsString().equals(className)){
-				this.classesMethods.put(entry.getKey(), entry.getValue().removeAll(commonMethods));
+			if((!entry.getKey().isInterface())&&(entry.getKey().getNameAsString().equals(className))){
+				entry.setValue(finalMethods);
 			}
-
 		}
-
-		return commonMethods;
-
 	}
-	
+
 	public HashMap<ClassOrInterfaceDeclaration, List<MethodDeclaration>> getRefinedMethods(){
 		return this.classesMethods;
 

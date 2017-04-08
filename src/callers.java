@@ -51,6 +51,7 @@ public class callers {
 			this.classesOrInterfaces.addAll(cdc.getClassesORInterfaces());
 		}
 
+
 		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
 			DependencyGetter dg = new DependencyGetter(ci, this.interfaces);
 			for(String dependency : dg.getUses()){
@@ -72,6 +73,9 @@ public class callers {
 
 
 
+		Realization r = new Realization(this.classesMethods, this.classesImplements);
+		this.classesMethods = r.getRefinedMethods();
+		
 		/*Code for Association*/
 		
 		Association association = new Association(associationsList, this.classifierNames);

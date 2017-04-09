@@ -63,55 +63,64 @@ public class Association {
 			}
 		}
 
-		otherRelationships();
+		//otherRelationships();
 	}
 
 
 	public void otherRelationships(){
 		boolean relExist = false;
 		List<ArrayList<String>> tempRel = new ArrayList<ArrayList<String>>();
-		for(Entry<String, ArrayList<String>> entry : this.associationsList.entrySet()){
-//			System.out.println(entry.getKey());
-			ArrayList<String> assoc = entry.getValue();
-			for(ArrayList<String> someRel : this.finalRel){
-//				System.out.println(someRel.size());
-				for (int i = 0; i < assoc.size(); i++){
-					if(i % 2 == 0) {
-//						System.out.println("Getting relation with " + assoc.get(i));
 
-//							Pattern p = Pattern.compile("\\b"+entry.getValue().get(i)+"\\b");
-//							Matcher m = p.matcher(assoc.get(0));
-//							Pattern p1 = Pattern.compile("\\b"+entry.getKey()+"\\b");
-//							Matcher m1 = p1.matcher(assoc.get(3));
-//							if(!(m.find() )&& !(m1.find())){
-//								relExist = true;
-//							}
-//						}
-//
+		for(Entry<String, ArrayList<String>> association : this.associationsList.entrySet()){
+			System.out.println(association.getKey());
+			System.out.println(association.getValue());
+
+			ArrayList<String> associationForCurrent = association.getValue();
+			
+			for(int i=0;i<associationForCurrent.size();i=i+2){
+
+				relExist = false;
+
+				if(!tempRel.isEmpty()){
+					for(ArrayList<String> rel : tempRel){
+						Pattern p1 = Pattern.compile("\\b"+associationForCurrent.get(i)+"\\b");
+						Matcher m1 = p1.matcher(rel.get(0));
+						Pattern p2 = Pattern.compile("\\b"+association.getKey()+"\\b");
+						Matcher m2 = p2.matcher(rel.get(3));
+						Pattern p3 = Pattern.compile("\\b"+associationForCurrent.get(i)+"\\b");
+						Matcher m3 = p3.matcher(rel.get(3));
+						Pattern p4 = Pattern.compile("\\b"+association.getKey()+"\\b");
+						Matcher m4 = p4.matcher(rel.get(0));
+
+						if((!(m1.find() )&& !(m2.find())) || (!(m3.find() )&& !(m4.find()))){
+							relExist = true;
+							break;
+						}
+						else{
+							relative = associationForCurrent.get(i+1);
+							System.out.println(relative);
+							
+						}
 					}
-//					if(!relExist){
-//						relative = entry.getValue().get(i+1);					
-//						ArrayList<String> rl = new ArrayList<>();
-//						rl.add(0, entry.getKey());
-//						rl.add(1, "--\""+relative+"\"");
-//						rl.add(2, entry.getValue().get(i));
-//						tempRel.add(rl);	
-//
-//					}
+				}
+
+				if(!relExist){
+					ArrayList<String> rl = new ArrayList<>();
+
+					rl.add(0, association.getKey());
+					rl.add(1, "\""+relative+"\"--");
+					rl.add(2, "");
+					rl.add(3, associationForCurrent.get(i));
+					finalRel.add(rl);
 
 				}
 			}
 
+
+
+
 		}
 
-		//		else{
-		//			relative = entry.getValue().get(i+1);					
-		//			ArrayList<String> rl = new ArrayList<>();
-		//			rl.add(0, entry.getKey());
-		//			rl.add(1, "--\""+relative+"\"");
-		//			rl.add(2, entry.getValue().get(i));
-		//			tempRel.add(rl);	
-		//		}
 
 		this.finalRel.addAll(tempRel);
 	}

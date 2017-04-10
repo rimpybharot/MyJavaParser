@@ -12,7 +12,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
-public class callers {
+public class PlantUMLNotationMaker {
 
 	private String umlTextNotation;
 	private HashMap<ClassOrInterfaceDeclaration, List<MethodDeclaration>> classesMethods;
@@ -26,7 +26,7 @@ public class callers {
 	private HashMap<String, ArrayList<String>> associationsList = new HashMap<>();
 	private List<ArrayList<String>> finalRel = new ArrayList<ArrayList<String>>();
 
-	public callers(List<File> javafiles) throws ParseException, IOException{
+	public PlantUMLNotationMaker(List<File> javafiles) throws ParseException, IOException{
 
 		String plantUmlSource = new String();
 

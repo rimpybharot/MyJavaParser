@@ -17,7 +17,7 @@ public class PlantUMLDiargramGenerator {
 
 		callers p = new callers(javafiles);
 
-		new PlantUMLDiargramGenerator(p.getumlTextNoation());
+		new PlantUMLDiargramGenerator(p.getumlTextNotation());
 
 
 	}

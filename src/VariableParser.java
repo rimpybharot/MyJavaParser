@@ -15,26 +15,16 @@ public class VariableParser {
 	ArrayList<String> relatedClasses = new ArrayList<String>();
 
 	public VariableParser(ClassOrInterfaceDeclaration cd, List<String> classifierNames) {
-
-		//		System.out.println(classifierNames);
-		//		System.out.println(cd.getNameAsString());
-
 		cardinality = "";
 		removeFields = new ArrayList<FieldDeclaration>();
 		new VoidVisitorAdapter<Object>() {
 			public void visit(FieldDeclaration fd, Object arg) {
 				for(VariableDeclarator v : fd.getVariables()){
 					String typeOfVariable = v.getType().getClass().getSimpleName();
-
 					String relatedClass = new String();
 					switch(typeOfVariable){
 					case "ClassOrInterfaceType" :
-						//						System.out.println(fd.toString());
-						//						System.out.println(cd.getNameAsString()+"///"+v.getNameAsString());
-						//						System.out.println(v.getType().toString());
-						//						String variableType = v.getType().toString();
 						String variableType = fd.toString();
-						//						System.out.println(variableType);
 						if(variableType.contains("Collection")
 								|| variableType.contains("Set")
 								|| variableType.contains("HashMap")
@@ -46,8 +36,6 @@ public class VariableParser {
 							cardinality = "0..*";
 							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
 							setFieldsToBeRemoved(fd);
-							//							System.out.println(relatedClass);
-
 						}
 						else if(variableType.contains("[") && variableType.contains("]")){
 							cardinality = (variableType.substring(variableType.indexOf("[") + 1,
@@ -59,19 +47,16 @@ public class VariableParser {
 						}
 						else if(!variableType.contains("String")){
 							relatedClass = fd.getElementType().toString();
-							cardinality = "1";
+							//							cardinality = "1";
+							cardinality = "-"+v.getNameAsString();
 							setFieldsToBeRemoved(fd);
 
 							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
-
-
 						}
 						break;
 					default : ; break;
 					}
-
 				}
-
 			}
 		}.visit(cd, null);
 	}
@@ -87,26 +72,29 @@ public class VariableParser {
 		ArrayList<String> values = new ArrayList<String>();
 		values.add(classifier);
 		values.add(cardinality);
+		values.add(objectName);
 		this.relatedClasses.addAll(values);
 		this.associations.put(cd.getNameAsString(), this.relatedClasses);
-		if(cardinality==""){
-			this.association.add("\n"+cd.getNameAsString()+"--"+classifier
-					//					+":"+objectName
-					+"\n");
-		}
-		else{
-			this.association.add("\n"+cd.getNameAsString()+"--"+"\""+cardinality+"\""+classifier
-					//				+":"+objectName
-					+"\n");
-		}
+		//		if(cardinality==""){
+		//			this.association.add("\n"+cd.getNameAsString()+"--"+classifier
+		//					+":"+objectName
+		//					+"\n");
+		//		}
+		//		else{
+		//			this.association.add("\n"+cd.getNameAsString()+"--"+"\""+cardinality+"\""+classifier
+		//					+":"+objectName
+		//					+"\n");
+		//		}
+		//
+		//
+		//		//System.out.println(this.association);
 
 	}
-	public List<String> getAssociation() {
-		return this.association;
 
-	}
 
 	public HashMap<String, ArrayList<String>> getAssociations() {
+		//System.out.println(this.associations);
+
 		return this.associations;
 
 	}

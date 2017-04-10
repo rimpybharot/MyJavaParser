@@ -14,21 +14,28 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 public class DependencyGetter {
 	private List<String> dependencies = new ArrayList<String>();
 
+	public DependencyGetter(ClassOrInterfaceDeclaration classID, List<String> interfaces) {
+		String className = classID.getNameAsString();
+		
+		
+		
 
-
-
-	public DependencyGetter(ClassOrInterfaceDeclaration n, List<String> interfaces) {
-
-//		for(String i : interfaces){
-//			System.out.println(i);
-//		}
-		String className = n.getNameAsString();
-
-		if(!n.isInterface()){
+		if(!classID.isInterface()){
 			new VoidVisitorAdapter<Object>() {
 				@Override
 				public void visit(MethodDeclaration n, Object arg) {
 					super.visit(n, arg);
+					
+					
+					
+					VariableDeclaration vd = new VariableDeclaration();
+					String methodDependency = vd.getDependenciesFromMethods(n, interfaces);
+					if(methodDependency!=null){
+					dependencies.add("\n"+className + "..>" + methodDependency+":uses\n");
+					}
+
+					
+					
 					NodeList<Parameter> parameters = n.getParameters();
 					for(Parameter p : parameters){
 						if(interfaces.toString().contains(p.getType().toString())){
@@ -38,7 +45,7 @@ public class DependencyGetter {
 					}
 
 				}
-			}.visit(n, null);
+			}.visit(classID, null);
 		}
 
 			new VoidVisitorAdapter<Object>() {
@@ -55,20 +62,8 @@ public class DependencyGetter {
 					}
 
 				}
-			}.visit(n, null);
+			}.visit(classID, null);
 		}
-
-
-//	}
-
-//
-//
-//
-//	public void setUses(String uses) {
-//		if(!this.dependencies.contains(uses)){
-//			this.dependencies.add(uses);}
-//
-//	}
 
 	public List<String> getUses(){
 

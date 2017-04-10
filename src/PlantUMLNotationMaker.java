@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,21 +12,21 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
-public class PlantUMLNotationMaker {
+public class callers {
 
 	private String umlTextNotation;
 	private HashMap<ClassOrInterfaceDeclaration, List<MethodDeclaration>> classesMethods;
 	private HashMap<ClassOrInterfaceDeclaration, List<ConstructorDeclaration>> classesConstructors;
 	private HashMap<ClassOrInterfaceDeclaration, List<String>> classesImplements;
 	private HashMap<ClassOrInterfaceDeclaration, List<FieldDeclaration>> classesFields;
-	private List<String> extendsImplementation;
+	private List<String> extensions;
 	private List<String> interfaces;
 	private List<ClassOrInterfaceDeclaration> classesOrInterfaces;
 	private List<String> classifierNames ;
 	private HashMap<String, ArrayList<String>> associationsList = new HashMap<>();
 	private List<ArrayList<String>> finalRel = new ArrayList<ArrayList<String>>();
 
-	public PlantUMLNotationMaker(List<File> javafiles) throws ParseException, IOException{
+	public callers(List<File> javafiles) throws ParseException, IOException{
 
 		String plantUmlSource = new String();
 
@@ -34,11 +35,13 @@ public class PlantUMLNotationMaker {
 		classesConstructors = new HashMap<>();
 		classesImplements = new HashMap<>();
 		classesFields = new HashMap<>();
-		extendsImplementation = new ArrayList<String>();
+		extensions = new ArrayList<String>();
 		interfaces = new ArrayList<String>();
 		classesOrInterfaces = new ArrayList<>();
 		classifierNames = new ArrayList<>();
 
+		
+		/*Go to classes and Parse each to get complete class data*/
 		for(File file : javafiles){
 			ClassesDeclarationChecker cdc = new ClassesDeclarationChecker();
 			cdc.classOrInterfaceFinder(file);
@@ -46,21 +49,19 @@ public class PlantUMLNotationMaker {
 			this.classesConstructors.putAll(cdc.getConstructors());
 			this.classesImplements.putAll(cdc.getImplementations());
 			this.classesFields.putAll(cdc.getFields());
-			this.extendsImplementation.addAll(cdc.getExtensions());
+			this.extensions.addAll(cdc.getExtensions());
 			this.interfaces.addAll(cdc.getInterfaces());
 			this.classesOrInterfaces.addAll(cdc.getClassesORInterfaces());
 		}
-
-		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
-			DependencyGetter dg = new DependencyGetter(ci, this.interfaces);
-			for(String dependency : dg.getUses()){
-				plantUmlSource += dependency;
-			}
-		}
+		
+		
+		/*take classes and interfaces name*/
 		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
 			this.classifierNames.add(ci.getNameAsString());
 
-		}
+		}	
+		
+		/*Get classes and their associations with other classes*/
 		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
 			VariableParser vp = new VariableParser(ci, this.classifierNames);
 			associationsList.putAll(vp.getAssociations());
@@ -68,14 +69,22 @@ public class PlantUMLNotationMaker {
 			if(vp.getFieldsToBeRemoved()!=null && fd!=null){
 				fd.removeAll(vp.getFieldsToBeRemoved());
 			}
+			this.classesFields.remove(Collections.singleton(null));  
 		}
 
 
+		/*Get dependencies between classes and interfaces*/
+		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
+			DependencyGetter dg = new DependencyGetter(ci, this.interfaces);
+			for(String dependency : dg.getUses()){
+				plantUmlSource += dependency;
+			}
+		}
 
-		/*Code for Association*/
-		
-		Association association = new Association(associationsList, this.classifierNames);
-		
+		/*Create associations between classes and interfaces*/
+
+		Association association = new Association(associationsList);
+
 		for(ArrayList<String> relation : association.finalRel){
 			String associati = "";
 			for(String s : relation){
@@ -84,16 +93,45 @@ public class PlantUMLNotationMaker {
 			plantUmlSource += associati+"\n";
 		}
 
-		for(String extension : extendsImplementation ){
+		/*Create extensions between classes and interfaces*/
+
+		for(String extension : extensions ){
 			plantUmlSource += extension;
 
 		}
+		
+		/*Create realizations between classes and interfaces*/
+
+		//Remove common methods between interfaces and classes
+		Realization r = new Realization(this.classesMethods, this.classesImplements);
+		this.classesMethods = r.getRefinedMethods();
+		
+
+		//Create implementation relations
 		for (Map.Entry<ClassOrInterfaceDeclaration, List<String>> entry : this.classesImplements.entrySet()) {
 			for(String inter : entry.getValue()){
 				plantUmlSource += "\n"+ inter+ " <|.. " + entry.getKey().getNameAsString();
 
 			}
 		}
+
+		/*Remove getters setters and turn private fields if get set to public*/
+
+		for(Entry<ClassOrInterfaceDeclaration, List<MethodDeclaration>> entry: this.classesMethods.entrySet()){
+			GetterSetter gs = new GetterSetter();
+			
+			List<MethodDeclaration> gsmd = entry.getValue();
+			List<FieldDeclaration> gsfd = this.classesFields.get(entry.getKey());
+			if(!gsmd.isEmpty()){
+				if(!(gsfd==null)){
+					gs.getGetterSetter(entry.getValue(), this.classesFields.get(entry.getKey()));
+				}
+		}
+		}
+
+
+		/*Create attributes between classes and interfaces*/
+
 		for (Map.Entry<ClassOrInterfaceDeclaration, List<FieldDeclaration>> entry : this.classesFields.entrySet()) {
 			if(!entry.getValue().isEmpty()){
 				if(!entry.getKey().isInterface()){
@@ -106,6 +144,9 @@ public class PlantUMLNotationMaker {
 			}
 
 		}
+
+		/*Create constructor of classes*/
+
 		for (Map.Entry<ClassOrInterfaceDeclaration, List<ConstructorDeclaration>> entry :
 			this.classesConstructors.entrySet()) {
 			if(!entry.getValue().isEmpty()){
@@ -122,6 +163,9 @@ public class PlantUMLNotationMaker {
 			}
 
 		}
+		
+		/*Create methods of classes*/
+
 		for (Map.Entry<ClassOrInterfaceDeclaration, List<MethodDeclaration>> entry : this.classesMethods.entrySet()) {
 			if(!entry.getValue().isEmpty()){
 				if(!entry.getKey().isInterface()){
@@ -141,7 +185,8 @@ public class PlantUMLNotationMaker {
 		this.umlTextNotation = plantUmlSource;
 	}
 
-	public String getumlTextNoation(){
+
+	public String getumlTextNotation(){
 		return this.umlTextNotation;
 	}
 }

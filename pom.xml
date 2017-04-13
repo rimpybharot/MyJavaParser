@@ -4,7 +4,7 @@
 	<groupId>UMLParser</groupId>
 	<artifactId>UMLParser</artifactId>
 	<packaging>jar</packaging>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1</version>
 	<dependencies>
 		<dependency>
 			<groupId>com.github.javaparser</groupId>
@@ -49,14 +49,16 @@
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>3.0.0</version>
 				<configuration>
+					<appendAssemblyId>false</appendAssemblyId>
 					<archive>
 						<manifest>
-							<mainClass>ListElements</mainClass>
+							<mainClass>PlantUMLDiagramGenerator</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<finalName>umlparser</finalName>
 				</configuration>
 			</plugin>
 

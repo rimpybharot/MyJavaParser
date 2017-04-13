@@ -40,7 +40,7 @@ public class PlantUMLNotationMaker {
 		classesOrInterfaces = new ArrayList<>();
 		classifierNames = new ArrayList<>();
 
-		
+
 		/*Go to classes and Parse each to get complete class data*/
 		for(File file : javafiles){
 			ClassesDeclarationChecker cdc = new ClassesDeclarationChecker();
@@ -53,14 +53,14 @@ public class PlantUMLNotationMaker {
 			this.interfaces.addAll(cdc.getInterfaces());
 			this.classesOrInterfaces.addAll(cdc.getClassesORInterfaces());
 		}
-		
-		
+
+
 		/*take classes and interfaces name*/
 		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
 			this.classifierNames.add(ci.getNameAsString());
 
-		}	
-		
+		}
+
 		/*Get classes and their associations with other classes*/
 		for(ClassOrInterfaceDeclaration ci : this.classesOrInterfaces){
 			VariableParser vp = new VariableParser(ci, this.classifierNames);
@@ -85,7 +85,9 @@ public class PlantUMLNotationMaker {
 
 		Association association = new Association(associationsList);
 
-		for(ArrayList<String> relation : association.finalRel){
+		this.finalRel = association.getRelations();
+
+		for(ArrayList<String> relation : this.finalRel){
 			String associati = "";
 			for(String s : relation){
 				associati+=s;
@@ -99,13 +101,13 @@ public class PlantUMLNotationMaker {
 			plantUmlSource += extension;
 
 		}
-		
+
 		/*Create realizations between classes and interfaces*/
 
 		//Remove common methods between interfaces and classes
 		Realization r = new Realization(this.classesMethods, this.classesImplements);
 		this.classesMethods = r.getRefinedMethods();
-		
+
 
 		//Create implementation relations
 		for (Map.Entry<ClassOrInterfaceDeclaration, List<String>> entry : this.classesImplements.entrySet()) {
@@ -119,14 +121,14 @@ public class PlantUMLNotationMaker {
 
 		for(Entry<ClassOrInterfaceDeclaration, List<MethodDeclaration>> entry: this.classesMethods.entrySet()){
 			GetterSetter gs = new GetterSetter();
-			
+
 			List<MethodDeclaration> gsmd = entry.getValue();
 			List<FieldDeclaration> gsfd = this.classesFields.get(entry.getKey());
 			if(!gsmd.isEmpty()){
 				if(!(gsfd==null)){
 					gs.getGetterSetter(entry.getValue(), this.classesFields.get(entry.getKey()));
 				}
-		}
+			}
 		}
 
 
@@ -163,7 +165,7 @@ public class PlantUMLNotationMaker {
 			}
 
 		}
-		
+
 		/*Create methods of classes*/
 
 		for (Map.Entry<ClassOrInterfaceDeclaration, List<MethodDeclaration>> entry : this.classesMethods.entrySet()) {

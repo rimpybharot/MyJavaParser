@@ -49,7 +49,7 @@ public class ConstructorChecker {
 
 
 		for(Parameter p : parameters){
-			//			System.out.println("parameters " + p.getType());
+			//			//////////System.out.println("parameters " + p.getType());
 			p1 += p.getNameAsString() + ": " + p.getType();
 
 		}

@@ -56,17 +56,17 @@ public class Realization {
 		List<MethodDeclaration> commonMethods = new ArrayList<>();
 
 		for (MethodDeclaration interfaceMethod : interfaceMethods){
-			if(!interfaceMethod.isAbstract()){
+//			if(!interfaceMethod.isAbstract()){
 				for(MethodDeclaration classMethod : classMethods){
 					if (interfaceMethod.getNameAsString().equals(classMethod.getNameAsString())){
 						commonMethods.add(interfaceMethod);
 						break;
 					}
 					else{
-						////System.out.println("not found");
+						////////System.out.println("not found");
 					}
 				}
-			}
+//			}
 		}
 
 		Iterator<MethodDeclaration> allMethods = classesMethodsRefined.iterator();

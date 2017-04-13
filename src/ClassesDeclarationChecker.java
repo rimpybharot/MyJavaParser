@@ -102,7 +102,7 @@ public class ClassesDeclarationChecker {
 		return this.classesMethods;
 	}
 	public HashMap<ClassOrInterfaceDeclaration, List<ConstructorDeclaration>> getConstructors() {
-		this.classesMethods.remove(Collections.singleton(null));  
+		this.classesConstructors.remove(Collections.singleton(null));  
 		return this.classesConstructors;
 	}
 
@@ -170,12 +170,12 @@ public class ClassesDeclarationChecker {
 	}
 
 	public List<String> getInterfaces() {
-		// TODO Auto-generated method stub
+		this.interfaces.remove(Collections.singleton(null));  
 		return this.interfaces;
 	}
 
 	public List<String> getClassifiers() {
-		// TODO Auto-generated method stub
+		this.classifiers.remove(Collections.singleton(null));  
 		return this.classifiers;
 	}
 }

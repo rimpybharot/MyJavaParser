@@ -12,34 +12,39 @@ import net.sourceforge.plantuml.SourceStringReader;
 public class PlantUMLDiagramGenerator {
 
 	public static void main(String[] args){
-		FileHandling fh = new FileHandling(args[0]);
-		File f = new File(args[0].toString());
-		if(f.exists()){
-		List<File> javafiles = fh.getJavaFiles();
-		PlantUMLNotationMaker p;
-		try {
-			p = new PlantUMLNotationMaker(javafiles);
-			if(f.getName()!=null || !f.getName().isEmpty()){
+
+		try{
+			FileHandling fh = new FileHandling(args[0]);
+			File f = new File(args[0].toString());
+			if(f.exists()){
+				List<File> javafiles = fh.getJavaFiles();
+				PlantUMLNotationMaker p;
 				try {
-					new PlantUMLDiagramGenerator(p.getumlTextNotation(), f.getName());
-				} catch (SecurityException | IllegalArgumentException e) {
-					System.out.println("SecurityException file path");
+					p = new PlantUMLNotationMaker(javafiles);
+					if(f.getName()!=null || !f.getName().isEmpty()){
+						try {
+							new PlantUMLDiagramGenerator(p.getumlTextNotation(), f.getName());
+						} catch (SecurityException | IllegalArgumentException e) {
+							System.out.println("SecurityException file path");
+							return;
+						}
+					}
+					else{
+						System.out.println("Path is not correct");
+						return;
+					}
+				} catch (ParseException | IOException e) {
+					System.out.println("Check file path");
 					return;
 				}
 			}
 			else{
-				System.out.println("Path is not correct");
-				return;
+				System.out.println("File does not exist");
 			}
-		} catch (ParseException | IOException e) {
-			System.out.println("Check file path");
-			return;
-		}
-	}
-		else{
-			System.out.println("File does not exist");
-		}
 
+		} catch (ArrayIndexOutOfBoundsException ae){
+			System.out.println("Please provide inout folder path");
+		}
 	}
 
 	public PlantUMLDiagramGenerator(String plantumlTextNotation, String filename){

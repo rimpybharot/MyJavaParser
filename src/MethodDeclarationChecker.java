@@ -1,20 +1,11 @@
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
 
-import com.github.javaparser.ast.Node;
+import java.util.Collections;
+import java.util.List;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.ConstructorDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
-import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 public class MethodDeclarationChecker {
@@ -26,7 +17,6 @@ public class MethodDeclarationChecker {
 	private NodeList<Parameter> parameters;
 	private List<String> pmnames;
 	private List<String> parameterType;
-	private List<String> usesRelation;
 
 	public MethodDeclarationChecker(){};
 
@@ -35,9 +25,7 @@ public class MethodDeclarationChecker {
 		this.methods = new ArrayList<MethodDeclaration>();
 		this.methodNames = new ArrayList<String>();
 		this.parameters = new NodeList<>();
-		//		this.pmnames = new ArrayList<String>();
 		this.parameterType = new ArrayList<String>();
-		this.usesRelation = new ArrayList<String>();
 
 		new VoidVisitorAdapter<Object>() {
 			@Override
@@ -50,6 +38,8 @@ public class MethodDeclarationChecker {
 
 	public String methodStringCreator(MethodDeclaration n){
 
+		
+		if(n.isPublic()){
 
 		String type = null;
 		String name = null;
@@ -71,38 +61,23 @@ public class MethodDeclarationChecker {
 
 			first = false;
 		}
-		//		for(Parameter p : parameters){
-		//			p1 += p.getNameAsString() + ": " + p.getType();
-		//
-		//		}
 		name = n.getNameAsString() + "("+p1+")";
 		type = n.getType().toString();
-		modifier = "";
-		if(n.isPrivate()){
-			modifier ="-";
-		}
-		else if(n.isPublic()){
-			modifier ="+";
-		}
-		else if(n.isProtected()){
-			modifier ="#";
-		}
+		modifier = "+";
 		return modifier +" " + name + " : " + type;
+		}
+		else{
+			return " ";
+		}
 
 	}
 
 
 	public void setClassesMethods(MethodDeclaration n) {
-		// TODO Auto-generated method stub
 		this.methods.add(n);
-
 	}
 
 
-	//	public void setMethods(MethodDeclaration n){
-	//		this.methods.add(n);
-	//
-	//	}
 	public List<MethodDeclaration> getClassesMethods(){
 		return this.methods;
 
@@ -120,7 +95,6 @@ public class MethodDeclarationChecker {
 	}
 
 	public void setParamaterType(String parameterType) {
-		// TODO Auto-generated method stub
 		this.parameterType.add(parameterType);
 	}
 

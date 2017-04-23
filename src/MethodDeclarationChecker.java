@@ -51,8 +51,12 @@ public class MethodDeclarationChecker {
 
 
 		boolean first = true;
+		
+		System.out.println(n.getNameAsString());
+		
 		for (Parameter p : parameters) {
-			if (!first) {
+			if (first==false) {
+				System.out.println(first);
 				p1 += " , "+p.getNameAsString() + ": " + p.getType();
 			}
 			else{

@@ -24,6 +24,7 @@ public class VariableParser {
 					String relatedClass = new String();
 					switch(typeOfVariable){
 					case "ClassOrInterfaceType" :
+//					if(typeOfVariable=="ClassOrInterfaceType"){
 						String variableType = fd.toString();
 						if(variableType.contains("Collection")
 								|| variableType.contains("Set")
@@ -45,7 +46,8 @@ public class VariableParser {
 
 							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
 						}
-						else if(!variableType.contains("String")){
+//						else if(!variableType.contains("String")){
+						else if(classifierNames.contains(fd.getElementType().toString())){
 							relatedClass = fd.getElementType().toString();
 							//							cardinality = "1";
 							cardinality = "-"+v.getNameAsString();

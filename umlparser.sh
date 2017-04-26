@@ -1,1 +1,1 @@
-java -jar target/umlparser.java $1
+java -jar target/umlparser.jar $1

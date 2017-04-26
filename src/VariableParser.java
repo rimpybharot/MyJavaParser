@@ -24,7 +24,7 @@ public class VariableParser {
 					String relatedClass = new String();
 					switch(typeOfVariable){
 					case "ClassOrInterfaceType" :
-//					if(typeOfVariable=="ClassOrInterfaceType"){
+						//					if(typeOfVariable=="ClassOrInterfaceType"){
 						String variableType = fd.toString();
 						if(variableType.contains("Collection")
 								|| variableType.contains("Set")
@@ -46,7 +46,7 @@ public class VariableParser {
 
 							setAssociation(cd, relatedClass , cardinality, v.getName().toString());
 						}
-//						else if(!variableType.contains("String")){
+						//						else if(!variableType.contains("String")){
 						else if(classifierNames.contains(fd.getElementType().toString())){
 							relatedClass = fd.getElementType().toString();
 							//							cardinality = "1";
@@ -77,28 +77,11 @@ public class VariableParser {
 		values.add(objectName);
 		this.relatedClasses.addAll(values);
 		this.associations.put(cd.getNameAsString(), this.relatedClasses);
-		//		if(cardinality==""){
-		//			this.association.add("\n"+cd.getNameAsString()+"--"+classifier
-		//					+":"+objectName
-		//					+"\n");
-		//		}
-		//		else{
-		//			this.association.add("\n"+cd.getNameAsString()+"--"+"\""+cardinality+"\""+classifier
-		//					+":"+objectName
-		//					+"\n");
-		//		}
-		//
-		//
-		//		//System.out.println(this.association);
-
 	}
 
 
 	public HashMap<String, ArrayList<String>> getAssociations() {
-		//System.out.println(this.associations);
-
 		return this.associations;
-
 	}
 
 	public List<FieldDeclaration> getFieldsToBeRemoved(){

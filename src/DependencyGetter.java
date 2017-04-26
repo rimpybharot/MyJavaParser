@@ -16,26 +16,19 @@ public class DependencyGetter {
 
 	public DependencyGetter(ClassOrInterfaceDeclaration classID, List<String> interfaces) {
 		String className = classID.getNameAsString();
-		
-		
-		
 
 		if(!classID.isInterface()){
 			new VoidVisitorAdapter<Object>() {
 				@Override
 				public void visit(MethodDeclaration n, Object arg) {
 					super.visit(n, arg);
-					
-					
-					
+
 					VariableDeclaration vd = new VariableDeclaration();
 					String methodDependency = vd.getDependenciesFromMethods(n, interfaces);
 					if(methodDependency!=null){
 					dependencies.add("\n"+className + "..>" + methodDependency+":uses\n");
 					}
 
-					
-					
 					NodeList<Parameter> parameters = n.getParameters();
 					for(Parameter p : parameters){
 						if(interfaces.toString().contains(p.getType().toString())){

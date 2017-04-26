@@ -25,7 +25,7 @@ public class PlantUMLDiagramGenerator {
 						try {
 							new PlantUMLDiagramGenerator(p.getumlTextNotation(), f.getName());
 						} catch (SecurityException | IllegalArgumentException e) {
-							System.out.println("SecurityException file path");
+							System.out.println("Folder contains sub folders which were not considered for class diagram");
 							return;
 						}
 					}
@@ -43,7 +43,7 @@ public class PlantUMLDiagramGenerator {
 			}
 
 		} catch (ArrayIndexOutOfBoundsException ae){
-			System.out.println("Please provide inout folder path");
+			System.out.println("Please provide input folder path");
 		}
 	}
 

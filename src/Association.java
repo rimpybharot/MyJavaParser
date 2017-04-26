@@ -74,7 +74,6 @@ public class Association {
 
 				if((m1.find() && m2.find() && rm1.find() && rm2.find())
 				|| ( m3.find() && m4.find() && rm3.find() && rm4.find())){
-					//System.out.println("Relation is there");
 					relationExists = true;
 					break;
 				}

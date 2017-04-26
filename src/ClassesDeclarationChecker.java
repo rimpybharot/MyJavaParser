@@ -1,7 +1,5 @@
 
 import java.io.File;
-
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +12,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -158,13 +155,11 @@ public class ClassesDeclarationChecker {
 	}
 
 	public List<String> getExtensions() {
-		// TODO Auto-generated method stub
 		this.extensions.removeAll(Collections.singleton(null));  
 		return this.extensions;
 	}
 
 	public HashMap<ClassOrInterfaceDeclaration, List<String>> getImplementations() {
-		// TODO Auto-generated method stub
 		this.classesImplements.remove(Collections.singleton(null));  
 		return this.classesImplements;
 	}

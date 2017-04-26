@@ -31,62 +31,25 @@ public class ConstructorChecker {
 
 
 	public void setClassesConstructor(ConstructorDeclaration n) {
-		// TODO Auto-generated method stub
 		this.constructors.add(n);
 		
 	}
 	public List<ConstructorDeclaration> getClassesConstructor() {
-		// TODO Auto-generated method stub
 		return this.constructors;
 		
 	}
 	public String constructorStringCreator(ConstructorDeclaration n){
 
-//		String p1 ="";
-//		parameters = n.getParameters();
-//
-//		String name = null;
-//
-//
-//		for(Parameter p : parameters){
-//			//			//////////System.out.println("parameters " + p.getType());
-//			p1 += p.getNameAsString() + ": " + p.getType();
-//
-//		}
-//		name = n.getNameAsString() + "("+p1+")";
-//		String modifier = "";
-//		if(n.isPrivate()){
-//			modifier ="-";
-//		}
-//		else if(n.isPublic()){
-//			modifier ="+";
-//		}
-//		else if(n.isProtected()){
-//			modifier ="#";
-//		}
-//		return modifier +" " + name;
-		
-		
-
-		
-
-		String type = null;
 		String name = null;
 		String modifier = null;
 
 
 		String p1 ="";
 		parameters = n.getParameters();
-		
-		
-
 
 		boolean first = true;
-		
-		
 		for (Parameter p : parameters) {
 			if (first==false) {
-				System.out.println(p.getNameAsString());
 				p1 += " , "+p.getNameAsString() + ": " + p.getType();
 			}
 			else{
@@ -97,7 +60,7 @@ public class ConstructorChecker {
 		}
 		name = n.getNameAsString() + "("+p1+")";
 		modifier = "+";
-		return modifier +" " + name + " : " + type;
+		return modifier +" " + name;
 
 
 	}

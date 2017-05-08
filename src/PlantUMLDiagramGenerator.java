@@ -48,8 +48,8 @@ public class PlantUMLDiagramGenerator {
 	}
 
 	public PlantUMLDiagramGenerator(String plantumlTextNotation, String filename){
-		new File("output").mkdir();
-		String fileName = "output\\"+filename+".png";
+		//new File("output").mkdir();
+		String fileName = filename+".png";
 		System.out.println("Output file located at " + fileName);
 		SourceStringReader reader = new SourceStringReader(plantumlTextNotation);
 		FileOutputStream output;
